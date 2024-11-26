@@ -61,28 +61,75 @@ def create_accounts():
 # LIST ALL ACCOUNTS
 ######################################################################
 
-# ... place you code here to LIST accounts ...
-
+@app.route("/accounts", methods=["GET"])
+def list_accounts():
+    """
+    Creates an Account
+    This endpoint will create an Account based the data in the body that is posted
+    """
+    app.logger.info("Request to get all Accounts")
+    accounts = Account.all()
+    serialized_accounts = [account.serialize() for account in accounts]
+    return make_response(
+        jsonify(serialized_accounts), status.HTTP_200_OK
+    )
 
 ######################################################################
 # READ AN ACCOUNT
 ######################################################################
 
-# ... place you code here to READ an account ...
+@app.route("/accounts/<account_id>", methods=["GET"])
+def get_account(account_id):
+    """
+    Gets an Account
+    This endpoint will create an Account based the data in the body that is posted
+    """
+    app.logger.info(f"Request to get Account {account_id}")
+    account = Account.find(account_id)
+    if not account:
+        return make_response(
+            jsonify(f"Account with id {account_id} not found"), status.HTTP_404_NOT_FOUND
+        )
+    return make_response(
+        jsonify(account.serialize()), status.HTTP_200_OK
+    )
 
 
 ######################################################################
 # UPDATE AN EXISTING ACCOUNT
 ######################################################################
 
-# ... place you code here to UPDATE an account ...
+@app.route("/accounts/<account_id>", methods=["PUT"])
+def update_account(account_id):
+    """It should update an account"""
+    app.logger.info(f"Request to update Account {account_id}")
+    account = Account.find(account_id)
+    if not account:
+        return make_response(
+            jsonify(f"Account with id {account_id} not found"), status.HTTP_404_NOT_FOUND
+        )
+    
+    account.deserialize(request.get_json())
+    account.update()
+    return make_response(
+        jsonify(account.serialize()), status.HTTP_200_OK
+    )
 
 
 ######################################################################
 # DELETE AN ACCOUNT
 ######################################################################
 
-# ... place you code here to DELETE an account ...
+@app.route("/accounts/<account_id>", methods=["DELETE"])
+def delete_account(account_id):
+    """It should delete an account"""
+    app.logger.info(f"Request to update Account {account_id}")
+    account = Account.find(account_id)
+    if account:
+        account.delete()
+    return make_response(
+        "jsonify(account.serialize())", status.HTTP_204_NO_CONTENT
+    )
 
 
 ######################################################################

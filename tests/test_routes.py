@@ -124,3 +124,71 @@ class TestAccountService(TestCase):
         self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
     # ADD YOUR TEST CASES HERE ...
+    def test_list_accounts(self):
+        """It should list all Account objects"""
+        account1 = AccountFactory()
+        account2 = AccountFactory()
+        response_create1 = self.client.post(
+            BASE_URL,
+            json=account1.serialize(),
+            content_type="application/json"
+        )
+        self.assertEqual(response_create1.status_code, status.HTTP_201_CREATED)
+        response_create2 = self.client.post(
+            BASE_URL,
+            json=account2.serialize(),
+            content_type="application/json"
+        )
+        self.assertEqual(response_create2.status_code, status.HTTP_201_CREATED)
+        response = self.client.get(
+            BASE_URL
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.get_json()), 2)
+    
+    def test_read_account(self):
+        """It should return an Account object"""
+        account = AccountFactory()
+        response_create = self.client.post(
+            BASE_URL,
+            json=account.serialize(),
+            content_type="application/json"
+        )
+        self.assertEqual(response_create.status_code, status.HTTP_201_CREATED)
+        account_id = response_create.get_json()["id"]
+        response = self.client.get(
+            BASE_URL + f"/{account_id}",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+    
+    def test_update_account(self):
+        account = AccountFactory()
+        response_create = self.client.post(
+            BASE_URL,
+            json=account.serialize(),
+            content_type="application/json"
+        )
+        self.assertEqual(response_create.status_code, status.HTTP_201_CREATED)
+        account_id = response_create.get_json()["id"]
+        account_changed = AccountFactory()
+        response = self.client.put(
+            BASE_URL + f"/{account_id}",
+            json=account_changed.serialize(),
+            content_type="application/json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.get_json()["name"], account_changed.name)
+    
+    def test_delete_account(self):
+        account = AccountFactory()
+        response_create = self.client.post(
+            BASE_URL,
+            json=account.serialize(),
+            content_type="application/json"
+        )
+        self.assertEqual(response_create.status_code, status.HTTP_201_CREATED)
+        account_id = response_create.get_json()["id"]
+        response = self.client.delete(
+            BASE_URL + f"/{account_id}",
+        )
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
